@@ -1,14 +1,24 @@
 
+// For now you can place it in the outer-most (global) scope of your express_server.js file.
+function generateRandomString() {
+  var randomed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var result = '';
+  for ( var i = 0; i < length; i++ ) {
+      result += randomed.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+}
 
 
 
 // express
 const express = require("express");
 const app = express();// using variable "app" for express
+
 // bodyParser
 const bodyParser = require("body-parser");
-app.use(express.urlencoded({extended: true}))
-
+// app.use(express.urlencoded({extended: true}))
+app.use(bodyParser.urlencoded({extended: true}));
 // server
 const PORT = 8080; // default port 8080
 app.listen(PORT, () => {
@@ -32,6 +42,10 @@ app.get("/urls", (req, res) => {
 // above urls/:id's
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 //
 app.get("/urls/:shortURL", (req, res) => {
