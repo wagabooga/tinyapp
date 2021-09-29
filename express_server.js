@@ -62,7 +62,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // redirect link
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]); 
+  if (urlDatabase[req.params.shortURL]){
+    res.redirect(urlDatabase[req.params.shortURL]); 
+  }
+  else{
+    res.render("u_not_found");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
