@@ -40,19 +40,21 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+
 // above urls/:id's
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// creating url
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString()
   urlDatabase[shortURL] = req.body.longURL
-  console.log(req.body);  // Log the POST request body to the console
-  res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
+  // console.log(req.body);  // Log the POST request body to the console
+  res.redirect(`/urls/${shortURL}`);       
   
 });
-//
+// 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
@@ -61,12 +63,8 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-// link.urls/
 
-// probably delete?
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+
 
 
 
