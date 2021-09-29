@@ -60,10 +60,9 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// redirect link
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL
-  let longURL = urlDatabase[shortURL] 
-  res.redirect(`${longURL}`); 
+  res.redirect(urlDatabase[req.params.shortURL]); 
 });
 
 app.get("/urls.json", (req, res) => {
