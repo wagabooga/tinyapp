@@ -60,6 +60,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
+
+app.post("/urls/:shortURL", (req, res) => {
+  console.log("we got the long URL!", req.body.longURL)
+  urlDatabase[req.params.shortURL] = req.body.longURL
+})
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL]
   // refresh
@@ -75,6 +82,8 @@ app.get("/u/:shortURL", (req, res) => {
     res.render("u_not_found");
   }
 });
+
+
 
 
 app.get("/urls.json", (req, res) => {

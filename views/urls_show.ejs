@@ -21,7 +21,13 @@
           <%= shortURL %>
         </a></p>
     </div>
-    <div class="card-footer text-muted"></div>
+    <div class="card-footer text-muted">
+      <h1>Edit</h1>
+      <label>New URL:</label>
+      <input type="text" name="longURL"></input>
+      <!-- form to post to server, update endpoint for shortURL-->
+      <form method="POST" action="/urls/<%= shortURL %>"><button type="submit" class="btn btn-primary">Submit</button></form>
+    </div>
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
