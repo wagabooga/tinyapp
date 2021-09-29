@@ -23,10 +23,14 @@
     </div>
     <div class="card-footer text-muted">
       <h1>Edit</h1>
-      <label>New URL:</label>
-      <input type="text" name="longURL"></input>
-      <!-- form to post to server, update endpoint for shortURL-->
-      <form method="POST" action="/urls/<%= shortURL %>"><button type="submit" class="btn btn-primary">Submit</button></form>
+      <label for="longURL">New URL:</label>
+      <!-- form to post to server, update endpoint for shortURL -->
+      <form method="POST" action="/urls/<%= shortURL %>">
+        <!-- based off urls_new button -->
+        <input type="text" name="longURL"></input>
+        <!-- based off urls_new button -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
   </div>
   <!-- Bootstrap JS -->

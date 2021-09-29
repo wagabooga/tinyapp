@@ -63,8 +63,9 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
 app.post("/urls/:shortURL", (req, res) => {
-  console.log("we got the long URL!", req.body.longURL)
-  urlDatabase[req.params.shortURL] = req.body.longURL
+  const shortURL = req.params.shortURL
+  urlDatabase[shortURL] = req.body.longURL
+  res.redirect(`/urls/${shortURL}`)
 })
 
 app.post("/urls/:shortURL/delete", (req, res) => {
