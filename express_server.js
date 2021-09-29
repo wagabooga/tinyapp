@@ -39,6 +39,7 @@ const urlDatabase = {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+  
 });
 
 // above urls/:id's
