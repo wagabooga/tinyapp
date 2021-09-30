@@ -113,6 +113,11 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {user: users[req.cookies["user_id"]]}
+  res.render("login", templateVars);
+});
+
 app.post("/login", (req, res) => {    
   ////////////broke////////////////////
   res.cookie("username", req.body.username)
