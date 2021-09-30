@@ -11,16 +11,17 @@ function generateRandomString() {
 
 
 
-// express
+// imports
 const express = require("express");
-const app = express();// using variable "app" for express
-
-// bodyParser
+const cookieParser = require("cookie-parser")
 const bodyParser = require("body-parser");
-// app.use(express.urlencoded({extended: true}))
-app.use(bodyParser.urlencoded({extended: true}));
 
-// server
+// app server
+const app = express();// using variable "app" for express
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser())
+
+
 const PORT = 8080; // default port 8080
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -85,7 +86,10 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-
+app.post("/login", (req, res) => {    
+  res.cookie('username', req.body.username)
+  res.redirect(`/urls`)
+});
 
 
 app.get("/urls.json", (req, res) => {
