@@ -31,11 +31,24 @@ app.listen(PORT, () => {
 app.set("view engine", "ejs");
 
 
-//database
+// databases
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 // link.urls/
 app.get("/urls", (req, res) => {
@@ -108,6 +121,18 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.post("/register", (req, res) => {
+  const userID = generateRandomString()
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie("user_id", userID)
+  console.log(users)
+  res.redirect(`/urls`);       
+  
+});
 
 
 app.get("/urls.json", (req, res) => {
