@@ -25,9 +25,9 @@
       <h1>Edit</h1>
       <label for="longURL">New URL:</label>
       <!-- form to post to server, update endpoint for shortURL -->
-      <form method="POST" action="/urls/<%= shortURL %>">
+      <form class="form-inline" method="POST" action="/urls/<%= shortURL %>">
         <!-- based off urls_new button -->
-        <input type="text" name="longURL"></input>
+        <input class="form-control" type="text" name="longURL"></input>
         <!-- based off urls_new button -->
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
