@@ -9,9 +9,12 @@ function generateRandomString() {
   return result
 }
 
-function isEmailInUsers(email) {
+function isEmailInUsersWithPWCHeck(email, password = null) {
   for (let userid of Object.keys(users)){
     if (users[userid]["email"] === email) {
+      if (password !== null){
+        return (password === users[userid]["password"])
+      }
       return true
     }
   }
@@ -56,6 +59,8 @@ const users = {
     password: "dishwasher-funk"
   }
 }
+
+const emails = {}
 
 // link.urls/
 app.get("/urls", (req, res) => {
@@ -118,9 +123,18 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-app.post("/login", (req, res) => {    
-  ////////////broke////////////////////
-  res.cookie("username", req.body.username)
+app.post("/login", (req, res) => {  
+  // 400 error
+  if (!(req.body.email in emails)){
+    res.status(403).end()
+  }
+  if (req.body.password !== emails[req.body.email].password){
+    res.status(403).end()
+  }
+  res.cookie("user_id", emails[req.body.email].id)
+  // if (isEmailInUsers(req.body.email, req.body.password)){
+  //   res.status(403).end()
+  // }  
   res.redirect(`/urls`)
 });
 
@@ -136,7 +150,7 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (isEmailInUsers(req.body.email) || !req.body.email || !req.body.password){
+  if (isEmailInUsersWithPWCHeck(req.body.email) || !req.body.email || !req.body.password){
     res.status(400).end()
   }
   else{
@@ -146,11 +160,14 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: req.body.password
     }
+    emails[req.body.email] = {
+      id: userID,
+      password: req.body.password
+    }
     res.cookie("user_id", userID)
     console.log(users)
     res.redirect(`/urls`);       
   }
-  
 });
 
 
