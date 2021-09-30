@@ -9,7 +9,14 @@ function generateRandomString() {
   return result
 }
 
-
+function isEmailInUsers(email) {
+  for (let userid of Object.keys(users)){
+    if (users[userid]["email"] === email) {
+      return true
+    }
+  }
+  return false
+}
 
 // imports
 const express = require("express");
@@ -119,19 +126,25 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {user: users[req.cookies["user_id"]]}
+
   res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
-  const userID = generateRandomString()
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
+  if (isEmailInUsers(req.body.email) || !req.body.email || !req.body.password){
+    res.status(400).end()
   }
-  res.cookie("user_id", userID)
-  console.log(users)
-  res.redirect(`/urls`);       
+  else{
+    const userID = generateRandomString()
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    }
+    res.cookie("user_id", userID)
+    console.log(users)
+    res.redirect(`/urls`);       
+  }
   
 });
 
