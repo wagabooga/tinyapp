@@ -9,14 +9,23 @@ function generateRandomString() {
   return result
 }
 
-function isEmailInUsersWithPWCHeck(email, password = null) {
+function isEmailInUsersWithPWCheck(email, password = null) {
   for (let userid of Object.keys(users)){
     if (users[userid]["email"] === email) {
-      if (password !== null){
-        return (password === users[userid]["password"])
+      if (password === users[userid]["password"]){
+        return (users[userid])
+      }
+      else{
+        return false
       }
       return true
     }
+  }
+  return false
+}
+function validator(email, password){
+  if (!email || !password){
+    return "please fill in both"
   }
   return false
 }
@@ -124,18 +133,21 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {  
-  // 400 error
-  if (!(req.body.email in emails)){
-    res.status(403).end()
+  // 403 error
+  const email = req.body.email
+  const password = req.body.password
+  const validCheck = isEmailInUsersWithPWCheck(email,password)
+  if (!validCheck){
+    res.status(403).send("incorrect login")
   }
-  if (req.body.password !== emails[req.body.email].password){
-    res.status(403).end()
+  else{
+    res.cookie("user_id", validCheck)
+    console.log(validCheck)
+    // if (isEmailInUsers(req.body.email, req.body.password)){
+    //   res.status(403).end()
+    // }  
+    res.redirect(`/urls`)  
   }
-  res.cookie("user_id", emails[req.body.email].id)
-  // if (isEmailInUsers(req.body.email, req.body.password)){
-  //   res.status(403).end()
-  // }  
-  res.redirect(`/urls`)
 });
 
 app.post("/logout", (req, res) => {    
@@ -150,19 +162,24 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (isEmailInUsersWithPWCHeck(req.body.email) || !req.body.email || !req.body.password){
-    res.status(400).end()
+  const password = req.body.password
+  const email = req.body.email
+  const checkEqual = validator(email,password)
+  if (checkEqual){
+    res.status(400).send("error")
+    return
   }
   else{
+    const user = isEmailInUsersWithPWCheck(email,password)
+    if (user){
+      res.status(400).send("User exists")
+      return
+    }
     const userID = generateRandomString()
     users[userID] = {
       id: userID,
-      email: req.body.email,
-      password: req.body.password
-    }
-    emails[req.body.email] = {
-      id: userID,
-      password: req.body.password
+      email: email,
+      password: password
     }
     res.cookie("user_id", userID)
     console.log(users)
