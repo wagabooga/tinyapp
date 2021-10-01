@@ -1,5 +1,5 @@
 
-// For now you can place it in the outer-most (global) scope of your express_server.js file.
+//exporting functions 1
 function generateRandomString() {
   var randomed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   var result = '';
@@ -9,26 +9,35 @@ function generateRandomString() {
   return result
 }
 
-function isEmailInUsersWithPWCheck(email, password = null) {
+//exporting functions 2
+// if the login is good, return a user id, else return null
+function checkLoginAgainstDatabase(email, password = null) {
+  // userid is our string valued key
   for (let userid of Object.keys(users)){
     if (users[userid]["email"] === email) {
       if (password === users[userid]["password"]){
-        return (users[userid])
+        return (userid)
       }
       else{
-        return false
+        return null
       }
+    }
+  }
+  return null
+}
+//exporting functions 3
+function checkIfEmailOrPasswordEmpty(email, password){
+  return (!email || !password)
+}
+function checkIfEmailExists(email){
+  for (let userid of Object.keys(users)){
+    if (users[userid]["email"] === email) {
       return true
     }
   }
   return false
 }
-function validator(email, password){
-  if (!email || !password){
-    return "please fill in both"
-  }
-  return false
-}
+//exporting functions end
 
 // imports
 const express = require("express");
@@ -68,8 +77,6 @@ const users = {
     password: "dishwasher-funk"
   }
 }
-
-const emails = {}
 
 // link.urls/
 app.get("/urls", (req, res) => {
@@ -132,47 +139,46 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+// login/logout
 app.post("/login", (req, res) => {  
-  // 403 error
   const email = req.body.email
   const password = req.body.password
-  const validCheck = isEmailInUsersWithPWCheck(email,password)
+  const validCheck = checkLoginAgainstDatabase(email,password)
+
   if (!validCheck){
     res.status(403).send("incorrect login")
   }
   else{
+    // validCheck === checkLoginAgainstDatabase's return of userID
     res.cookie("user_id", validCheck)
     console.log(validCheck)
-    // if (isEmailInUsers(req.body.email, req.body.password)){
-    //   res.status(403).end()
-    // }  
     res.redirect(`/urls`)  
   }
 });
-
 app.post("/logout", (req, res) => {    
   res.clearCookie("user_id")
   res.redirect(`/urls`)
 });
+// login end
 
+// register
 app.get("/register", (req, res) => {
   const templateVars = {user: users[req.cookies["user_id"]]}
 
   res.render("register", templateVars);
 });
-
 app.post("/register", (req, res) => {
-  const password = req.body.password
   const email = req.body.email
-  const checkEqual = validator(email,password)
-  if (checkEqual){
-    res.status(400).send("error")
+  const password = req.body.password
+  const isEmailOrPasswordEmpty = checkIfEmailOrPasswordEmpty(email,password)
+  if (isEmailOrPasswordEmpty){
+    res.status(400).send("Email or Password is empty")
     return
   }
   else{
-    const user = isEmailInUsersWithPWCheck(email,password)
-    if (user){
-      res.status(400).send("User exists")
+    const doesEmailExist = checkIfEmailExists(email)
+    if (doesEmailExist){
+      res.status(400).send("User with Email already exists")
       return
     }
     const userID = generateRandomString()
@@ -186,7 +192,7 @@ app.post("/register", (req, res) => {
     res.redirect(`/urls`);       
   }
 });
-
+// register end
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
