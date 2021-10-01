@@ -1,4 +1,5 @@
 
+
 //exporting functions 1
 function generateRandomString() {
   var randomed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -49,7 +50,6 @@ const app = express();// using variable "app" for express
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser())
 
-
 const PORT = 8080; // default port 8080
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -57,7 +57,6 @@ app.listen(PORT, () => {
 
 // template
 app.set("view engine", "ejs");
-
 
 // databases
 const urlDatabase = {
@@ -83,12 +82,19 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
-
   };
   res.render("urls_index", templateVars);
-  
 });
 
+app.post("/urls", (req, res) => {
+  if (!req.cookies["user_id"]){
+    res.status(403).send("user is not logged in ")
+  }
+  const shortURL = generateRandomString()
+  urlDatabase[shortURL] = req.body.longURL
+  res.redirect(`/urls/${shortURL}`);       
+  
+});
 // above urls/:id's
 app.get("/urls/new", (req, res) => {
   if (!req.cookies["user_id"]){
@@ -98,15 +104,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// creating url
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL
-  // console.log(req.body);  // Log the POST request body to the console
-  res.redirect(`/urls/${shortURL}`);       
-  
-});
-// 
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
