@@ -41,17 +41,17 @@ function checkIfEmailExists(email) {
   }
   return false
 }
-function isUserLoggedIn(req){
-  if (req.cookies["user_id"]){
+function isUserLoggedIn(req) {
+  if (req.cookies["user_id"]) {
     return true
   }
   return false
 }
-function getUrlsForUser(userID){
+function getUrlsForUser(userID) {
   let urlsForUser = []
-  for (let value of Object.values(urlDatabase)){
-    if (value["userID"] === userID){
-      urlsForUser.push(value["longURL"])
+  for (let value of Object.values(urlDatabase)) {
+    if (value["userID"] === userID) {
+      urlsForUser.push(value)
     }
   }
   return urlsForUser
@@ -104,7 +104,7 @@ const users = {
 
 // /urls //
 app.get("/urls", (req, res) => {
-  if (isUserLoggedIn(req)){
+  if (isUserLoggedIn(req)) {
     const user = users[req.cookies["user_id"]]
     const templateVars = {
       urls: getUrlsForUser(user["id"]),
@@ -130,7 +130,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.cookies["user_id"]
-  } 
+  }
   res.redirect(`/urls/${shortURL}`);
 
 });
@@ -147,8 +147,51 @@ app.get("/urls/new", (req, res) => {
 
 // u/:id //
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]["longURL"] };
-  res.render("urls_show", templateVars);
+  const user = users[req.cookies["user_id"]]
+  const urlBelongsToUser = false
+
+  // see if url belogns to user
+  if (user) { // this is because the user must exist to have urlbelongtouser === true
+    for (let url of getUrlsForUser(user.id)) {
+      console.log(url)
+      if (url === req.params.shortURL) {
+        urlBelongsToUser = true
+      }
+    }
+  }
+  // logged in and user belongs
+  if (isUserLoggedIn(req) && urlBelongsToUser === true) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user,
+      isUserLoggedIn: true,
+      urlBelongsToUser
+    };
+    res.render("urls_show", templateVars);
+  }
+  // user is logged in but url does not belong
+  else if (isUserLoggedIn(req)) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user,
+      isUserLoggedIn: true,
+      urlBelongsToUser
+    };
+    res.render("urls_show", templateVars)
+  }
+  // else
+  else {
+    const templateVars = {
+      shortURL: null,
+      longURL: null,
+      user: null,
+      isUserLoggedIn: false,
+      urlBelongsToUser
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {

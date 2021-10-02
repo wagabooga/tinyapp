@@ -12,6 +12,7 @@
   <header>
     <%- include('partials/_header') %>
   </header>
+  <% if (isUserLoggedIn && urlBelongsToUser) { %>
   <div class="card text-center">
     <div class="card-header"></div>
     <div class="card-body">
@@ -33,6 +34,11 @@
       </form>
     </div>
   </div>
+  <% } else if (isUserLoggedIn) { %>
+    <h1><b>This is not your URL</b></h1>
+  <% } else { %>
+    <h1><b>Please log in</b></h1>
+  <% } %>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
