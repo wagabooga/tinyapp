@@ -4,6 +4,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser")
 const bodyParser = require("body-parser");
 const { json } = require("body-parser");
+const bcrypt = require('bcryptjs');
 // imports end //
 
 
@@ -21,7 +22,7 @@ function checkLoginAgainstDatabase(email, password = null) {
   // userid is our string valued key
   for (let userid of Object.keys(users)) {
     if (users[userid]["email"] === email) {
-      if (password === users[userid]["password"]) {
+      if (bcrypt.compareSync(password, users[userid]["password"])) {
         return (userid)
       }
       else {
@@ -276,6 +277,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email
   const password = req.body.password
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const isEmailOrPasswordEmpty = checkIfEmailOrPasswordEmpty(email, password)
   if (isEmailOrPasswordEmpty) {
     res.status(400).send("Email or Password is empty")
@@ -291,7 +293,7 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email: email,
-      password: password
+      password: hashedPassword
     }
     res.cookie("user_id", userID)
     console.log(users)
