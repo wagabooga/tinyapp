@@ -3,6 +3,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser")
 const bodyParser = require("body-parser");
+const { json } = require("body-parser");
 // imports end //
 
 
@@ -48,13 +49,26 @@ function isUserLoggedIn(req) {
   return false
 }
 function getUrlsForUser(userID) {
-  let urlsForUser = []
-  for (let value of Object.values(urlDatabase)) {
-    if (value["userID"] === userID) {
-      urlsForUser.push(value)
+  let urlsForUser = {}
+  for (let key of Object.keys(urlDatabase)) {
+    if (urlDatabase[key]["userID"] === userID) {
+      urlsForUser[key] = {...urlDatabase[key]}
     }
   }
   return urlsForUser
+}
+function urlBelongsToUser (paramsShortURL, user) {
+  let urlBelongsToUser = false
+
+  // see if url belogns to user
+  if (user) { // this is because the user must exist to have urlbelongtouser === true
+    for (let shortURL of Object.keys(getUrlsForUser(user.id))) {
+      if (shortURL === paramsShortURL) {
+        urlBelongsToUser = true
+      }
+    }
+  }
+  return urlBelongsToUser
 }
 //exporting functions end//
 
@@ -106,8 +120,11 @@ const users = {
 app.get("/urls", (req, res) => {
   if (isUserLoggedIn(req)) {
     const user = users[req.cookies["user_id"]]
+    const urlsForUser = getUrlsForUser(user["id"])
     const templateVars = {
-      urls: getUrlsForUser(user["id"]),
+      urls: Object.keys(urlsForUser).map(key => {
+        return [key , urlsForUser[key]]
+      }),
       user,
       isUserLoggedIn: true
     };
@@ -148,25 +165,15 @@ app.get("/urls/new", (req, res) => {
 // u/:id //
 app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]]
-  const urlBelongsToUser = false
-
-  // see if url belogns to user
-  if (user) { // this is because the user must exist to have urlbelongtouser === true
-    for (let url of getUrlsForUser(user.id)) {
-      console.log(url)
-      if (url === req.params.shortURL) {
-        urlBelongsToUser = true
-      }
-    }
-  }
+  const paramsURLBelongsToUser = urlBelongsToUser(req.params.shortURL, user)
   // logged in and user belongs
-  if (isUserLoggedIn(req) && urlBelongsToUser === true) {
+  if (isUserLoggedIn(req) && paramsURLBelongsToUser === true) {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]["longURL"],
       user,
       isUserLoggedIn: true,
-      urlBelongsToUser
+      paramsURLBelongsToUser
     };
     res.render("urls_show", templateVars);
   }
@@ -177,7 +184,7 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: urlDatabase[req.params.shortURL]["longURL"],
       user,
       isUserLoggedIn: true,
-      urlBelongsToUser
+      paramsURLBelongsToUser
     };
     res.render("urls_show", templateVars)
   }
@@ -188,7 +195,7 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: null,
       user: null,
       isUserLoggedIn: false,
-      urlBelongsToUser
+      paramsURLBelongsToUser
     };
     res.render("urls_show", templateVars);
   }
@@ -214,9 +221,15 @@ app.get("/u/:shortURL", (req, res) => {
 
 // u/:id delete //
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]
+  const user = users[req.cookies["user_id"]]
+  if (urlBelongsToUser(req.params.shortURL, user) && isUserLoggedIn(req)){
+    delete urlDatabase[req.params.shortURL]
+    res.redirect(`/urls`)
+  }
+  else{
+    res.status(403).send("You dont have permissions to delete this link or you are not logged in.")
+  }
   // refresh
-  res.redirect(`/urls`)
 });
 // u/:id delete end //
 
@@ -241,7 +254,6 @@ app.post("/login", (req, res) => {
   else {
     // validCheck === checkLoginAgainstDatabase's return of userID
     res.cookie("user_id", validCheck)
-    console.log(validCheck)
     res.redirect(`/urls`)
   }
 });
