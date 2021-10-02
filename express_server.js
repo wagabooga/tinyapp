@@ -41,6 +41,21 @@ function checkIfEmailExists(email) {
   }
   return false
 }
+function isUserLoggedIn(req){
+  if (req.cookies["user_id"]){
+    return true
+  }
+  return false
+}
+function getUrlsForUser(userID){
+  let urlsForUser = []
+  for (let value of Object.values(urlDatabase)){
+    if (value["userID"] === userID){
+      urlsForUser.push(value["longURL"])
+    }
+  }
+  return urlsForUser
+}
 //exporting functions end//
 
 
@@ -89,21 +104,33 @@ const users = {
 
 // /urls //
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_index", templateVars);
+  if (isUserLoggedIn(req)){
+    const user = users[req.cookies["user_id"]]
+    const templateVars = {
+      urls: getUrlsForUser(user["id"]),
+      user,
+      isUserLoggedIn: true
+    };
+    res.render("urls_index", templateVars);
+  }
+  else {
+    const templateVars = {
+      user: null,
+      urls: null,
+      isUserLoggedIn: false
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 app.post("/urls", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  if (!isUserLoggedIn(req)) {
     res.status(403).send("user is not logged in ")
   }
   const shortURL = generateRandomString()
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.cookies["user_id"]
-  }
+  } 
   res.redirect(`/urls/${shortURL}`);
 
 });
@@ -112,9 +139,6 @@ app.post("/urls", (req, res) => {
 
 // urls/new //
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies["user_id"]) {
-    res.redirect(`/login`)
-  }
   const templateVars = { user: users[req.cookies["user_id"]] }
   res.render("urls_new", templateVars);
 });
@@ -127,7 +151,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
   urlDatabase[shortURL]["longURL"] = req.body.longURL
   res.redirect(`/urls`)
@@ -182,7 +206,7 @@ app.post("/login", (req, res) => {
 // logout //
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")
-  res.redirect(`/urls`)
+  res.redirect(`/login`)
 });
 // logout end//
 
