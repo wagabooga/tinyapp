@@ -19,15 +19,19 @@ function generateRandomString() {
 }
 // if the login is good, return a user id, else return null
 function checkLoginAgainstDatabase(email, password = null) {
-  // userid is our string valued key
-  for (let userid of Object.keys(users)) {
-    if (users[userid]["email"] === email) {
-      if (bcrypt.compareSync(password, users[userid]["password"])) {
-        return (userid)
-      }
-      else {
-        return null
-      }
+  const user = getUserByEmail(email, users)
+  if (bcrypt.compareSync(password, user["password"])) {
+    return (user.id)
+  }
+  else {
+    return null
+  }
+}
+
+function getUserByEmail(email, database) {
+  for (let userid of Object.keys(database)) {
+    if (database[userid]["email"] === email) {
+      return database[userid]
     }
   }
   return null
@@ -36,10 +40,8 @@ function checkIfEmailOrPasswordEmpty(email, password) {
   return (!email || !password)
 }
 function checkIfEmailExists(email) {
-  for (let userid of Object.keys(users)) {
-    if (users[userid]["email"] === email) {
-      return true
-    }
+  if (getUserByEmail(email, users)){
+    return true
   }
   return false
 }
@@ -53,12 +55,12 @@ function getUrlsForUser(userID) {
   let urlsForUser = {}
   for (let key of Object.keys(urlDatabase)) {
     if (urlDatabase[key]["userID"] === userID) {
-      urlsForUser[key] = {...urlDatabase[key]}
+      urlsForUser[key] = { ...urlDatabase[key] }
     }
   }
   return urlsForUser
 }
-function urlBelongsToUser (paramsShortURL, user) {
+function urlBelongsToUser(paramsShortURL, user) {
   let urlBelongsToUser = false
 
   // see if url belogns to user
@@ -79,7 +81,7 @@ const app = express();// using variable "app" for express
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: [`key1`,`key2`],
+  keys: [`key1`, `key2`],
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -129,7 +131,7 @@ app.get("/urls", (req, res) => {
     const urlsForUser = getUrlsForUser(user["id"])
     const templateVars = {
       urls: Object.keys(urlsForUser).map(key => {
-        return [key , urlsForUser[key]]
+        return [key, urlsForUser[key]]
       }),
       user,
       isUserLoggedIn: true
@@ -228,11 +230,11 @@ app.get("/u/:shortURL", (req, res) => {
 // u/:id delete //
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.session.user_id]
-  if (urlBelongsToUser(req.params.shortURL, user) && isUserLoggedIn(req)){
+  if (urlBelongsToUser(req.params.shortURL, user) && isUserLoggedIn(req)) {
     delete urlDatabase[req.params.shortURL]
     res.redirect(`/urls`)
   }
-  else{
+  else {
     res.status(403).send("You dont have permissions to delete this link or you are not logged in.")
   }
   // refresh
@@ -276,7 +278,7 @@ app.post("/logout", (req, res) => {
 
 // register//
 app.get("/register", (req, res) => {
-  const templateVars = { user: users[req.session.user_id]}
+  const templateVars = { user: users[req.session.user_id] }
 
   res.render("register", templateVars);
 });
