@@ -164,8 +164,14 @@ app.post("/urls", (req, res) => {
 });
 ////////////////////////// urls/new //////////////////////////
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.session.user_id] }
-  res.render("urls_new", templateVars);
+  if (isUserLoggedIn(req)){
+    const templateVars = { user: users[req.session.user_id] }
+    res.render("urls_new", templateVars);
+  }
+  else {
+    res.redirect("/login")
+  }
+
 });
 
 ////////////////////////// u/:id //////////////////////////
