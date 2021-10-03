@@ -35,8 +35,10 @@
       </form>
     </div>
   </div>
+  <% } else if (isUserLoggedInBool && urlExistsInDatabase === false) { %>
+    <h1><b>This url does not exist</b></h1>
   <% } else if (isUserLoggedInBool) { %>
-    <h1><b>This is not your URL</b></h1>
+    <h1><b>This is not your url</b></h1>
   <% } else { %>
     <h1><b>Please log in</b></h1>
   <% } %>

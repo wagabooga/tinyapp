@@ -178,6 +178,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.session.user_id]
   const paramsURLBelongsToUser = urlBelongsToUser(req.params.shortURL, user, urlDatabase)
+  const urlExistsInDatabase = !!urlDatabase[req.params.shortURL]
   // logged in and user belongs
   if (isUserLoggedIn(req) && paramsURLBelongsToUser === true) {
     const templateVars = {
@@ -185,18 +186,32 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: urlDatabase[req.params.shortURL]["longURL"],
       user,
       isUserLoggedInBool: true,
-      paramsURLBelongsToUser
+      paramsURLBelongsToUser,
+      urlExistsInDatabase
     };
     res.render("urls_show", templateVars);
   }
-  // user is logged in but url does not belong
-  else if (isUserLoggedIn(req)) {
+// the user is logged in but the url does not exist
+  else if (isUserLoggedIn(req) && urlExistsInDatabase === false) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: null,
+      user,
+      isUserLoggedInBool: true,
+      paramsURLBelongsToUser,
+      urlExistsInDatabase
+    };
+    res.render("urls_show", templateVars)
+  }
+    // user is logged in but url does not belong
+  else if (isUserLoggedIn(req)){
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]["longURL"],
       user,
       isUserLoggedInBool: true,
-      paramsURLBelongsToUser
+      paramsURLBelongsToUser,
+      urlExistsInDatabase
     };
     res.render("urls_show", templateVars)
   }
@@ -207,7 +222,8 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: null,
       user: null,
       isUserLoggedInBool: false,
-      paramsURLBelongsToUser
+      paramsURLBelongsToUser,
+      urlExistsInDatabase
     };
     res.render("urls_show", templateVars);
   }
