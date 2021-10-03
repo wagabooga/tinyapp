@@ -153,6 +153,7 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   if (!isUserLoggedIn(req)) {
     res.status(403).send("user is not logged in ")
+    return
   }
   const shortURL = generateRandomString()
   urlDatabase[shortURL] = {
