@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 
+
 function getUserByEmail(email, usersDatabase) {
   // we want to loop through our userid is (6 letter string)  
   for (let userid of Object.keys(usersDatabase)) {
@@ -10,6 +11,8 @@ function getUserByEmail(email, usersDatabase) {
   }
   return null
 }
+
+
 function generateRandomString() {
   const randomed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
@@ -18,6 +21,8 @@ function generateRandomString() {
   }
   return result
 }
+
+
 // this email is used to check password
 // we use password null here because we only want to use crypt the password if password was given
 function checkLoginAgainstDatabase(email, password = null, usersDatabase) {
@@ -29,24 +34,31 @@ function checkLoginAgainstDatabase(email, password = null, usersDatabase) {
     return null
   }
 }
+
+
 // this function uses the database to find our userid by email
 // find the user (user = {}) variable by email, compares from database being user itself
-
 function checkIfEmailOrPasswordEmpty(email, password) {
   return (!email || !password)
 }
+
+
 function checkIfEmailExists(email, usersDatabase) {
   if (getUserByEmail(email, usersDatabase)){
     return true
   }
   return false
 }
+
+
 function isUserLoggedIn(req) {
   if (req.session.user_id) {
     return true
   }
   return false
 }
+
+
 function getUrlsForUser(userID, urlDatabase) {
   let urlsForUser = {}
 // we need to access to all users
@@ -75,12 +87,12 @@ function urlBelongsToUser(paramsShortURL, user, urlDatabase) {
 }
 
 module.exports = {
-generateRandomString,
-getUserByEmail,
-checkLoginAgainstDatabase,
-checkIfEmailExists,
-checkIfEmailOrPasswordEmpty,
-isUserLoggedIn,
-getUrlsForUser,
-urlBelongsToUser
+  generateRandomString,
+  getUserByEmail,
+  checkLoginAgainstDatabase,
+  checkIfEmailExists,
+  checkIfEmailOrPasswordEmpty,
+  isUserLoggedIn,
+  getUrlsForUser,
+  urlBelongsToUser
 }
