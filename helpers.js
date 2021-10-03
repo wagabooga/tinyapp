@@ -27,7 +27,7 @@ function generateRandomString() {
 // we use password null here because we only want to use crypt the password if password was given
 function checkLoginAgainstDatabase(email, password = null, usersDatabase) {
   const user = getUserByEmail(email, usersDatabase)
-  if (bcrypt.compareSync(password, user["password"])) {
+  if ( user !== null && bcrypt.compareSync(password, user["password"])) {
     return (user.id)
   }
   else {

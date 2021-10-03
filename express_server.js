@@ -63,6 +63,14 @@ app.listen(PORT, () => {
 ////////////////////////// template //////////////////////////
 app.set("view engine", "ejs");
 
+app.get("/", (req, res) => {
+  if (isUserLoggedIn(req)){
+    res.redirect("/urls")
+  }
+  else {
+    res.redirect("/login")
+  }
+});
 ////////////////////////// login //////////////////////////
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.session.user_id] }
